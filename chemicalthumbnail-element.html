@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`chemicalthumbnail-element`
+thumbnail for menu
+
+@demo demo/index.html 
+-->
+
+<dom-module id="chemicalthumbnail-element">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'chemicalthumbnail-element',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'chemicalthumbnail-element',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
