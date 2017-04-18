@@ -4,7 +4,8 @@
   "main": "chemicalthumbnail-element.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "paper-card": "PolymerElements/paper-card#^1.1.4"
+    "paper-card": "PolymerElements/paper-card#^1.1.4",
+    "polymerfire": "firebase/polymerfire#^0.11.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

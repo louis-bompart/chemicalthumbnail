@@ -1,10 +1,8 @@
-;)(selyutSetadpu.siht
-}
-{ )(  noitcnuf : ydaer  nu  f :ydaer
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../paper-styles/typography.html">
+<link rel="import" href="../polymerfire/polymerfire.html">
 
 <!--
 `chemicalthumbnail-element`
@@ -19,18 +17,15 @@ thumbnail for menu
       :host {
         display: block;
       }
-
-      .diatomic-nonmetal {
-        background: var(--paper-amber-500);
-      }
-
       paper-card {
+        width: 100%;
+        background: var(--paper-amber-500);
         --paper-card-header-text: {
           @apply(--paper-font-display3);
         };
       }
     </style>
-    <paper-card class$="[[category]]" heading="[[symbol]]">
+    <paper-card class$="[[category]]" heading="[[data.symbol]]">
     </paper-card>
   </template>
 
@@ -40,25 +35,20 @@ thumbnail for menu
       is: 'chemicalthumbnail-element',
 
       properties: {
-        /*Symbol of the element*/
-        symbol: {
-          type: String,
-          value: 'H',
-        },
-        /*Name of the element*/
-        name: {
-          type: String,
-          value: 'Hydrogen'
-        },
-        /*Category of the element*/
-        category: {
-          type: String,
-          value: 'diatomic-nonmetal'
+        /*Id of the element in the db*/
+
+        data: {
+          type: Object,
+          value: {
+            symbol:"?"
+          }
+          notify: true,
+          reflectToAttribute: true
         }
       },
       ready: function() {
         this.updateStyles();
-      }
+      },
 
     });
   </script>
