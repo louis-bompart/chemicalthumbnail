@@ -3,6 +3,12 @@
 <link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../paper-styles/typography.html">
 <link rel="import" href="../polymerfire/polymerfire.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-backdrop.html">
+<link rel="import" href="../neon-animation/neon-animation.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<script src="../lodash/lodash.min.js"></script>
 
 <!--
 `chemicalthumbnail-element`
@@ -12,44 +18,273 @@ thumbnail for menu
 -->
 
 <dom-module id="chemicalthumbnail-element">
-  <template>
-    <style is="custom-style">
-      :host {
-        display: block;
-      }
-      paper-card {
-        width: 100%;
-        background: var(--paper-amber-500);
-        --paper-card-header-text: {
-          @apply(--paper-font-display3);
-        };
-      }
-    </style>
-    <paper-card class$="[[category]]" heading="[[data.symbol]]">
-    </paper-card>
-  </template>
+    <template id="chemicalElementTemplate">
+        <style is="custom-style" include="iron-flex iron-flex-alignment">
+            :host {
+                /*display: block;*/
+            }
 
-  <script>
-    Polymer({
+            #symbol {
+                @apply(--paper-font-headline);
+            }
 
-      is: 'chemicalthumbnail-element',
+            #atomicNumber {
+                @apply(--paper-font-headline);
+            }
 
-      properties: {
-        /*Id of the element in the db*/
+            .solid {
+            }
 
-        data: {
-          type: Object,
-          value: {
-            symbol:"?"
+            .gas {
+                color: var(--paper-red-500);
+            }
+
+            .liquid {
+                color: var(--paper-green-500);
+            }
+
+            .stateUnknown {
+                color: var(--paper-grey-500);
+            }
+
+            .primordial {
+                border: solid var(--paper-purple-500);
+            }
+
+            .decay {
+                border: dashed var(--paper-brown-500);
+            }
+
+            .synthetic {
+                border: dotted var(--paper-blue-500);
+            }
+
+            .alkaliMetal {
+                background: var(--paper-red-400);
+            }
+
+            .alkalineEarthMetal {
+                background: var(--paper-orange-100);
+            }
+
+            .lathanide {
+                background: var(--paper-purple-100);
+            }
+
+            .actinide {
+                background: var(--paper-pink-200);
+            }
+
+            .transitionMetal {
+                background: var(--paper-deep-orange-100);
+            }
+
+            .metalloid {
+                background: var(--paper-lime-800);
+            }
+
+            .postTransitionMetal {
+                background: var(--paper-grey-400);
+            }
+
+            .polyAtomicNonmetal {
+                background: var(--paper-green-a200);
+            }
+
+            .diAtomicNonmetal {
+                background: var(--paper-lime-400);
+            }
+
+            .nobleGas {
+                background: var(--paper-cyan-a100);
+            }
+
+            .typeUnknown {
+                background: var(--paper-grey-300);
+            }
+
+            paper-card {
+                min-width: 10%;
+                /*background: var(--paper-amber-500);*/
+                --paper-card-header-text: {
+                    @apply(--paper-font-display3);
+                };
+            }
+        </style>
+        <paper-card id="card">
+            <paper-dialog id="dialog" on-iron-overlay-opened="patchOverlay" entry-animation="scale-up-animation"
+                          exit-animation="fade-out-animation">
+                <h2 id="dialogHeading"></h2>
+                <div role="listbox" id="dialogContent">
+                </div>
+            </paper-dialog>
+            <div id="cardContent" class="card-content">
+                <div id="label" class="layout vertical center">{{data.elementLabel}}</div>
+                <div id="atomicNumber" class="layout vertical center">{{data.protons}}</div>
+                <div id="symbol" class="layout vertical center">{{data.symbol}}</div>
+            </div>
+        </paper-card>
+    </template>
+
+    <script>
+      Polymer({
+
+        is: 'chemicalthumbnail-element',
+
+        properties: {
+            /*Id of the element in the db*/
+
+          data: {
+            type: Object,
+            value: {
+              symbol: '?'
+            },
+            notify: true,
+            reflectToAttribute: true
           }
-          notify: true,
-          reflectToAttribute: true
-        }
-      },
-      ready: function() {
-        this.updateStyles();
-      },
+        },
+        listeners: {
+          'tap': 'openDialog'
+        },
+        openDialog: function () {
+          this.$.dialog.open()
+        },
+        patchOverlay: function (e) {
+          if (e.target.withBackdrop) {
+            e.target.parentNode.insertBefore(e.target.backdropElement, e.target)
+          }
+        },
+        getState: function () {
+          var NbProtons = parseInt(this.data.protons)
+          var liquid = [35, 80]
+          var gas = [1, 2, 7, 8, 9, 10, 17, 18, 36, 54, 86]
+          var unknown = _.range(100, 119)
+          //The rest is solid
 
-    });
-  </script>
+          if (liquid.includes(NbProtons)) {
+            return 'liquid'
+          } else if (gas.includes(NbProtons)) {
+            return 'gas'
+          } else if (unknown.includes(NbProtons)) {
+            return 'unknown'
+          } else {
+            return 'solid'
+          }
+        },
+        getNature: function () {
+          var NbProtons = parseInt(this.data.protons)
+          var decay = [43, 61].concat(_.range(84, 90).concat(_.range(91, 95)))
+          var synthetic = _.range(95, 119)
+          //The rest is primordial
+
+          if (decay.includes(NbProtons)) {
+            return 'decay'
+          } else if (synthetic.includes(NbProtons)) {
+            return 'synthetic'
+          } else {
+            return 'primordial'
+          }
+        },
+        getType: function () {
+          var NbProtons = parseInt(this.data.protons)
+          var alkaliMetal = [3, 11, 19, 37, 55, 87]
+          var alkalineEarthMetal = [4, 12, 20, 38, 56, 88]
+          var lathanide = _.range(57, 72)
+          var actinide = _.range(89, 104)
+          var postTransitionMetal = [13, 31, 49, 50, 81, 82, 83, 84]
+          var metalloid = [5, 14, 32, 33, 51, 52, 85]
+          var polyAtomicNonmetal = [6, 15, 16, 34]
+          var diAtomicNonmetal = [1, 7, 8, 9, 17, 35, 53]
+          var nobleGas = [2, 10, 18, 36, 54, 86]
+          var unknown = [109, 110, 111, 113, 114, 115, 116, 117, 118]
+          //The rest is transition metal
+
+          if (alkaliMetal.includes(NbProtons)) {
+            return 'alkaliMetal'
+          } else if (alkalineEarthMetal.includes(NbProtons)) {
+            return 'alkalineEarthMetal'
+          } else if (lathanide.includes(NbProtons)) {
+            return 'lathanide'
+          } else if (actinide.includes(NbProtons)) {
+            return 'actinide'
+          } else if (postTransitionMetal.includes(NbProtons)) {
+            return 'postTransitionMetal'
+          } else if (metalloid.includes(NbProtons)) {
+            return 'metalloid'
+          } else if (polyAtomicNonmetal.includes(NbProtons)) {
+            return 'polyAtomicNonmetal'
+          } else if (diAtomicNonmetal.includes(NbProtons)) {
+            return 'diAtomicNonmetal'
+          } else if (nobleGas.includes(NbProtons)) {
+            return 'nobleGas'
+          } else if (unknown.includes(NbProtons)) {
+            return 'unknown'
+          } else {
+            return 'transitionMetal'
+          }
+        },
+        ready: function () {
+          this.data.elementLabel = this.data.elementLabel.charAt(0).toUpperCase() + this.data.elementLabel.slice(1)
+
+          //State
+          var state = this.getState()
+          if (state === 'unknown')
+            state = 'stateUnknown'
+          this.$.atomicNumber.classList.add(state)
+
+          //Nature
+          var nature = this.getNature()
+          this.$.cardContent.classList.add(nature)
+
+          //Type
+          var type = this.getType()
+          if (type === 'unknown')
+            type = 'typeUnknown'
+          this.$.cardContent.classList.add(type)
+
+          //Title case for labels
+          this.$.label.innerHTML = this.$.label.innerHTML.charAt(0).toUpperCase() + this.$.label.innerHTML.slice(1)
+
+          var content = this.$.dialogContent
+          var headingContent = this.$.dialogHeading
+          var data = this.data
+
+          Object.keys(data).forEach(function (key) {
+              if (key !== '$key') {
+                if (key !== 'elementLabel') {
+                  var keyArray = key.split('_')
+                  var properKeyArray = []
+
+                  keyArray.forEach(function (keyElement) {
+                    properKeyArray.push(keyElement.charAt(0).toUpperCase() + keyElement.slice(1))
+                  })
+
+                  var properKey = properKeyArray.join(' ')
+
+                  var item = document.createElement('paper-item')
+                  item.innerHTML = '<b>' + properKey + ':</b> ' + data[key]
+                  content.appendChild(item)
+                } else {
+                  var heading = data[key]
+                  headingContent.innerHTML = heading.charAt(0).toUpperCase() + heading.slice(1)
+                }
+              }
+            }
+          )
+
+          var itemNature = document.createElement('paper-item')
+          itemNature.innerHTML = '<b>Nature:</b> ' + nature.charAt(0).toUpperCase() + nature.slice(1)
+          content.appendChild(itemNature)
+
+          var itemState = document.createElement('paper-item')
+          itemState.innerHTML = '<b>State:</b> ' + state.charAt(0).toUpperCase() + state.slice(1)
+          content.appendChild(itemState)
+
+          var itemType = document.createElement('paper-item')
+          itemType.innerHTML = '<b>Type:</b> ' + type.charAt(0).toUpperCase() + type.slice(1)
+          content.appendChild(itemType)
+          this.updateStyles()
+        }
+      })
+    </script>
 </dom-module>
